@@ -1,6 +1,6 @@
 # Quality Control Procedure for Camera Trap Imagery used in Vegetation Green-up Monitoring
 # Developed and tested using Python 3.12
-
+# Link to folder (root directory) located at the end of the script
 
 # Import Dependencies
 import os
@@ -8,10 +8,14 @@ import cv2
 import numpy as np
 import shutil
 
-# Link to folder (root directory) located at the end of the script
+# === Function Toggles (on/off switches) ===
+RUN_NIR_DETECTION = True
+RUN_BLUR_DETECTION = True
+RUN_DEEP_SNOW_DETECTION = True
+RUN_LOW_SATURATION_DETECTION = False
+RUN_BLUE_SNOW_DETECTION = True
 
 # Function to separate RGB and NIR imagery through greyscale or low saturation detection
-
 def separate_nir_images(root_dir):
     os.makedirs(nir_dir, exist_ok=True)
 
@@ -204,60 +208,45 @@ def root_directory(root_dir):
             reasons = []
 
             # Run NIR Detection
-            if len(image.shape) == 2:
-                should_move = True
-                reasons.append("NIR_grayscale")
-            else:
-                height, width, _ = image.shape
-                center_y = height // 2
-                start_x = max(0, (width - 500) // 2)
-                end_x = min(width, start_x + 500)
-
-                center_strip = image[center_y:center_y + 1, start_x:end_x]
-                hsv_strip = cv2.cvtColor(center_strip, cv2.COLOR_BGR2HSV)
-                saturation = hsv_strip[:, :, 1]
-
-                if not (saturation > 20).any():
+            if RUN_NIR_DETECTION:
+                if len(image.shape) == 2:
                     should_move = True
-                    reasons.append("NIR_low_saturation")
+                    reasons.append("NIR_grayscale")
+                else:
+                    height, width, _ = image.shape
+                    center_y = height // 2
+                    start_x = max(0, (width - 500) // 2)
+                    end_x = min(width, start_x + 500)
+
+                    center_strip = image[center_y:center_y + 1, start_x:end_x]
+                    hsv_strip = cv2.cvtColor(center_strip, cv2.COLOR_BGR2HSV)
+                    saturation = hsv_strip[:, :, 1]
+
+                    if not (saturation > 20).any():
+                        should_move = True
+                        reasons.append("NIR_low_saturation")
 
             # Run Blur Detection
-            if is_blurry(image):
+            if RUN_BLUR_DETECTION and is_blurry(image):
                 should_move = True
                 reasons.append("blur")
 
             # Run Deep Snow Detection
-            if detect_deep_snow(image):
+            if RUN_DEEP_SNOW_DETECTION and detect_deep_snow(image):
                 should_move = True
                 reasons.append("snow_blockage")
 
             # Run Low Saturation (Limited Foliage) Detection
-            if is_low_saturation(image):
+            if RUN_LOW_SATURATION_DETECTION and is_low_saturation(image):
                 should_move = True
                 reasons.append("low_saturation")
 
             # Run Blue (Heavy Snow) Detection
-            if detect_snow_by_blue_pixels(image):
+            if RUN_BLUE_SNOW_DETECTION and detect_snow_by_blue_pixels(image):
                 should_move = True
                 reasons.append("blue_snow")
-#
-
-            if should_move:
-                relative_path = os.path.relpath(dirpath, root_dir)
-                target_dir = os.path.join(quality_control_dir, relative_path)
-                os.makedirs(target_dir, exist_ok=True)
-
-                dest_path = os.path.join(target_dir, file)
-                os.makedirs(os.path.dirname(dest_path), exist_ok=True)
-
-                try:
-                    shutil.move(file_path, dest_path)
-                    print(f"Moved to QC ({', '.join(reasons)}): {file_path} -> {dest_path}")
-                except FileNotFoundError:
-                    print(f"ERROR: Tried to move but file no longer exists: {file_path}")
-
 
 
 
 # Establish link to your folder
-root_directory("\\user\yourdataset") #Enter your desired folder here
+root_directory(r"path/to/your/dataset") #Enter your desired folder here
