@@ -1,5 +1,5 @@
 # Quality Control Procedure for Camera Trap Imagery used in Vegetation Green-up Monitoring
-# Code run on Python 3.12
+# Developed and tested using Python 3.12
 
 
 # Import Dependencies
