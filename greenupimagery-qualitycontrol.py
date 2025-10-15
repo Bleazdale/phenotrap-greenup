@@ -15,7 +15,7 @@ RUN_DEEP_SNOW_DETECTION = True
 RUN_LOW_SATURATION_DETECTION = False
 RUN_BLUE_SNOW_DETECTION = True
 
-# Function to separate RGB and NIR imagery through greyscale or low saturation detection
+# Function to separate RGB and NIR imagery through greyscale and low saturation detection
 def separate_nir_images(root_dir):
     os.makedirs(nir_dir, exist_ok=True)
 
