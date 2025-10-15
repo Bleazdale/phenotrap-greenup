@@ -56,7 +56,7 @@ import os
             # Save lossless PNG
             mask.save(output_path, format='PNG', compress_level=0)
             
-            # Log saved File
+            # Log saved file
             print(f"Saved: {output_path}") 
 
 # Link to JSON file ready for conversion
