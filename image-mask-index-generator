@@ -1,0 +1,60 @@
+# Image-Mask Index Generator
+#-----------------------------------------------------------------------------------------------
+# This script produces an index that maps images, masks and classes together for the purposes of semantic segmentation training
+# Image names are derived from a JSON file that was also used to produce the mask PNG files.
+# The output of this script is an XLSX file that is to be incorporated in a semantic segmentation script
+
+
+# Import dependencies
+
+import os
+import re
+import json
+from openpyxl import Workbook
+
+# Define paths
+json_path = r"path/to/your/file.json" # Replace with the path to your JSON file
+mask_folder = r"path/to/your/mask_folder" # Replace with the path to your maks folder
+output_file = r"path/to/your/output_index-xlsx" # Replace with the desired path and name of your index XLSX file
+
+# Build lookup dict: task_id -> true image name
+with open(json_path, "r", encoding="utf-8") as f:
+    tasks = json.load(f)
+
+id_to_image = {}
+for task in tasks:
+    task_id = task.get("id")
+    file_upload = task.get("file_upload", "")
+    if task_id and file_upload:
+        clean_name = file_upload.split("-", 1)[-1]      # remove Label Studio prefix
+        clean_name = os.path.splitext(clean_name)[0]    # drop extension (.JPG etc.)
+        id_to_image[str(task_id)] = clean_name
+
+# Collect all mask files
+mask_files = [
+    f for f in os.listdir(mask_folder)
+    if f.lower().endswith(".png")
+]
+
+# Create Excel workbook
+wb = Workbook()
+ws = wb.active
+ws.title = "Image–Mask Mapping" # sheet name
+ws.append(["image-name", "mask-name", "class-name"]) # column heading names
+
+# Match mask filenames to image IDs and classes
+for mask_file in sorted(mask_files, key=lambda s: [int(t) if t.isdigit() else t.lower() for t in re.split(r'(\d+)', s)]): #orders it in natural human (Folder) order
+    # Expect: mask12_Pine_0.png
+    match = re.match(r"mask(\d+)_(.+?)_(\d+)\.png", mask_file, flags=re.IGNORECASE)
+    if not match:
+        continue
+
+    task_id, label, _ = match.groups()
+    image_name = id_to_image.get(task_id, "Unknown")
+    ws.append([image_name, mask_file, label])
+
+# Save the output file
+wb.save(output_file)
+
+#Log saved file
+print(f"Saved mapping file to {output_file}"
