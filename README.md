@@ -9,3 +9,7 @@ Run script greenupimagery-qualitycontrol.py
 
 ### Step 2 Convert JSON file to PNG masks
 Run script convert-json-to-png.py
+
+### Step 3 Generate Image-Mask_Class Index
+Run script image-mask-index-generator
+
