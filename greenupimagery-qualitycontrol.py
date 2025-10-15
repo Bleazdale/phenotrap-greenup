@@ -44,13 +44,11 @@ def separate_nir_images(root_dir):
                 print(f"Classified grayscale {file} as NIR.")
                 continue
 
-            # Extract  horizontal center row
-
+            # Extract  horizontal center row in case of coloured logo in header or footer maintained
             height, width, _ = image.shape
             center_y = height // 2
             start_x = max(0, (width - 500) // 2)
             end_x = min(width, start_x + 500)
-
 
             center_strip = image[center_y:center_y+1, start_x:end_x]
             hsv_strip = cv2.cvtColor(center_strip, cv2.COLOR_BGR2HSV)
