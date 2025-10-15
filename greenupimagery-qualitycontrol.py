@@ -71,7 +71,6 @@ def is_blurry(image, threshold=150): # threshold=50 for high-threshold blurring,
 
 
 # Function to separate deep snow imagery from original dataset
-
 def detect_deep_snow(
     image,
     std_threshold=12, # How flat the region must be -limited variance in pixels
@@ -105,7 +104,6 @@ def detect_deep_snow(
     )
 
 # Function to separate imagery with low saturation - Dark, heavy snow, minimal foliage or live vegetation
-
 def is_low_saturation(
     image,
     saturation_threshold=100, # Remove images with a saturation lower than 100
@@ -136,7 +134,6 @@ def is_low_saturation(
     return green_ratio_in_low_sat < green_allowance
 
 # Function to separate imagery with in heavy snow based on blue-dominant pixels, accounting for camera white balance
-
 def detect_snow_by_blue_pixels(
     image,
     blue_ratio_threshold=0.4, # Remove images that contain 40% blue pixels
@@ -176,9 +173,9 @@ def detect_snow_by_blue_pixels(
 
     return True
 
-
+# Create a new location for images that do not pass quality control
 def root_directory(root_dir):
-    quality_control_dir = os.path.join(root_dir, 'Quality_Control') # Set destination location (Currently within Destination folder - This can be set to a different location manually by removing root_dir,)
+    quality_control_dir = os.path.join(root_dir, 'quality-control-rejected') # Set to desired destination location (Currently within Destination folder - This can be set to a different location manually by removing root_dir,)
     os.makedirs(quality_control_dir, exist_ok=True)
 
     image_extensions = ('.jpg', '.jpeg', '.png', '.bmp', '.tif', '.tiff')
