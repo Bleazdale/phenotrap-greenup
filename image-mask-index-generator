@@ -2,20 +2,19 @@
 #-----------------------------------------------------------------------------------------------
 # This script produces an index that maps images, masks and classes together for the purposes of semantic segmentation training
 # Image names are derived from a JSON file that was also used to produce the mask PNG files.
-# The output of this script is an XLSX file that is to be incorporated in a semantic segmentation script
+# The output of this script is a CSV file that is to be incorporated in a semantic segmentation script
 
 
 # Import dependencies
-
 import os
 import re
 import json
-from openpyxl import Workbook
+import csv
 
 # Define paths
 json_path = r"path/to/your/file.json" # Replace with the path to your JSON file
 mask_folder = r"path/to/your/mask_folder" # Replace with the path to your maks folder
-output_file = r"path/to/your/output_index-xlsx" # Replace with the desired path and name of your index XLSX file
+output_file = r"path/to/your/output_index.csv" # Replace with the desired path and name of your index CSV file
 
 # Build lookup dict: task_id -> true image name
 with open(json_path, "r", encoding="utf-8") as f:
@@ -31,30 +30,30 @@ for task in tasks:
         id_to_image[str(task_id)] = clean_name
 
 # Collect all mask files
+def natural_sort_key(s):
+    return [int(text) if text.isdigit() else text.lower()
+            for text in re.split(r'(\d+)', s)]
+
 mask_files = [
     f for f in os.listdir(mask_folder)
     if f.lower().endswith(".png")
 ]
+mask_files.sort(key=natural_sort_key)
 
-# Create Excel workbook
-wb = Workbook()
-ws = wb.active
-ws.title = "Image–Mask Mapping" # sheet name
-ws.append(["image-name", "mask-name", "class-name"]) # column heading names
 
-# Match mask filenames to image IDs and classes
-for mask_file in sorted(mask_files, key=lambda s: [int(t) if t.isdigit() else t.lower() for t in re.split(r'(\d+)', s)]): #orders it in natural human (Folder) order
-    # Expect: mask12_Pine_0.png
-    match = re.match(r"mask(\d+)_(.+?)_(\d+)\.png", mask_file, flags=re.IGNORECASE)
-    if not match:
-        continue
+# Create CSV file
 
-    task_id, label, _ = match.groups()
-    image_name = id_to_image.get(task_id, "Unknown")
-    ws.append([image_name, mask_file, label])
+with open(output_file, "w", newline="", encoding="utf-8") as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(["image-name", "mask-name", "class-name"])
 
-# Save the output file
-wb.save(output_file)
+    for mask_file in mask_files:
+        match = re.match(r"mask(\d+)_(.+?)_(\d+)\.png", mask_file, flags=re.IGNORECASE)
+        if not match:
+            continue
 
-#Log saved file
-print(f"Saved mapping file to {output_file}"
+        task_id, label, _ = match.groups()
+        image_name = id_to_image.get(task_id, "Unknown")
+        writer.writerow([image_name, mask_file, label])
+
+print(f"Saved index file to {output_file}")
