@@ -54,7 +54,7 @@ with open(output_file, "w", newline="", encoding="utf-8") as csvfile:
 
         task_id, label, _ = match.groups()
         base_image = id_to_image.get(task_id, "Unknown")
-        image_name = base_image + ".png" if base_image != "Unknown" else "Unknown"
+        image_name = base_image + ".JPG" if base_image != "Unknown" else "Unknown"
         writer.writerow([image_name, mask_file, label])
 
 print(f"Saved index file to {output_file}")
