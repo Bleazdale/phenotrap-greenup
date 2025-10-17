@@ -42,17 +42,17 @@ mask_files.sort(key=natural_sort_key)
 
 
 # Create CSV file
-
 with open(output_file, "w", newline="", encoding="utf-8") as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(["image-name", "mask-name", "class-name"])
 
     for mask_file in mask_files:
-        match = re.match(r"mask(\d+)_(.+?)_(\d+)\.png", mask_file, flags=re.IGNORECASE)
+        # Match new naming pattern: Image<id>_<label>_<index>.png or Image<id>_background.png
+        match = re.match(r"mask(\d+)_([A-Za-z0-9_]+)(?:_\d+)?\.png", mask_file, flags=re.IGNORECASE) 
         if not match:
             continue
 
-        task_id, label, _ = match.groups()
+        task_id, label = match.groups()
         base_image = id_to_image.get(task_id, "Unknown")
         image_name = base_image + ".JPG" if base_image != "Unknown" else "Unknown"
         writer.writerow([image_name, mask_file, label])
