@@ -1,0 +1,59 @@
+# This script has been written for the purpose of converting binary masks into a single mask for multi-class segmentation
+# It assumes the output created in script convert-json-to-binary-png.py 
+
+
+# ==Import Dependencies==
+import os
+import re
+import numpy as np
+from PIL import Image
+
+# ==Define Class Mapping== 
+# Values relates to pixel brightness and is currently the standard
+# Use the following values as an example to produce a greyscale map for human visualisation (0:0, 1:50, 2:100, 3:150, 4:200)
+
+class_map = {
+    "background": 0, 
+    "class_2": 1, 
+    "class_3": 2,
+    "class_4": 3,
+    "class_5": 4,
+    "ignore": 255
+}
+
+ # ==Configure Paths==
+mask_folder = r"\\path\to\your\masks" # Change to your mask folder
+output_folder = r"\\path\to\your\output\" # Change to your output folder
+os.makedirs(output_folder, exist_ok=True) # Create output folder if one does not exist
+
+# ==Define Naming Convention==
+pattern = re.compile(r"(mask\d+)_([a-zA-Z_]+)(?:_\d+)?\.png") #assumes the naming convention mask1_pine_1.png
+
+groups = {}
+for file in os.listdir(mask_folder):
+    if not file.lower().endswith(".png"):
+        continue
+    m = pattern.match(file)
+    if not m:
+        continue
+    base, cls = m.groups()
+    groups.setdefault(base, []).append((cls, file))
+
+for base, class_files in groups.items():
+    first_mask = Image.open(os.path.join(mask_folder, class_files[0][1])).convert("L")
+    combined = np.zeros_like(np.array(first_mask), dtype=np.uint8)
+
+    for cls, file in class_files:
+        cls = cls.lower()
+        if cls not in class_map:
+            continue
+        mask_path = os.path.join(mask_folder, file)
+        mask = np.array(Image.open(mask_path).convert("L"))
+        combined[mask > 128] = class_map[cls]  # threshold fix
+
+# ==Save Files==
+    out_path = os.path.join(output_folder, f"{base}.png")
+    Image.fromarray(combined).save(out_path)
+
+
+print("Combined masks created:", output_folder)
