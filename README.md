@@ -16,7 +16,7 @@ For any questions please contact me at alexander.bleasdale@slu.se
 ## Walkthrough
 
 ### Step 1 Image Quality Control
-Run script greenupimagery-qualitycontrol.py
+Run script camera-trap-quality-control.py
 
 ### Step 2 Convert JSON file to PNG masks
 Run script convert-json-to-png.py
