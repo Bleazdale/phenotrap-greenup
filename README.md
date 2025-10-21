@@ -1,5 +1,16 @@
-# phenotrap-greenup
+# Phenotrap - Monitoring Vegetation Phenology through Camera Trap and Satellite Imagery
+Repository for protocols, procedures and scripts for the project "Monitoring Vegetation Phenology through Camera Trap and Satellite Imagery" at The Swedish University of Agricultural Sciences/Sveriges Lantbruksuniversitet (SLU)
 
+Principal Investigator: Alexander Bleasdale
+
+## Project Background
+
+## File Description
+
+## Data Availability
+
+## Contact
+For any questions please contact me at alexander.bleasdale@slu.se
 ## Publications
 
 ## Walkthrough
